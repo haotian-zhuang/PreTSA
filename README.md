@@ -12,6 +12,7 @@ devtools::install_github("haotian-zhuang/PreTSA")
 ```
 
 ## Vignettes
+Detailed vignettes are available at this [website](https://haotian-zhuang.github.io/PreTSA/).
 
 Vignette: [Model temporal gene expression patterns](https://haotian-zhuang.github.io/PreTSA/articles/PreTSA_temporal.html)
 
