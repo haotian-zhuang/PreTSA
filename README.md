@@ -13,9 +13,9 @@ devtools::install_github("haotian-zhuang/PreTSA")
 
 ## Vignettes
 
-Vignette: [Model temporal gene expression patterns]()
+Vignette: [Model temporal gene expression patterns](https://haotian-zhuang.github.io/PreTSA/articles/PreTSA_temporal.html)
 
-Vignette: [Model spatial gene expression patterns]()
+Vignette: [Model spatial gene expression patterns](https://haotian-zhuang.github.io/PreTSA/articles/PreTSA_spatial.html)
 
 ## Citation
 
@@ -27,6 +27,6 @@ Authors: Haotian Zhuang, Zhicheng Ji
 
 Report bugs and provide suggestions by sending email to:
 
-Maintainer: Haotian Zhuang ([haotian.zhuang\@duke.edu](mailto:haotian.zhuang@duke.edu){.email})
+Maintainer: Haotian Zhuang (haotian.zhuang@duke.edu)
 
 Or open a new issue on this GitHub page
