@@ -1,0 +1,23 @@
+Package: PreTSA
+Title: Pattern recognition in Temporal and Spatial Analyses
+Version: 1.0
+Authors@R: c(
+    person("Haotian", "Zhuang", email = "haotian.zhuang@duke.edu", role = c("aut", "cre"), comment = c(ORCID = "0000-0003-0513-748X")),
+    person("Zhicheng", "Ji", email = "zhicheng.ji@duke.edu", role = "aut", comment = c(ORCID = "0000-0002-9457-4704")))
+Description: PreTSA: computationally efficient modeling of temporal and spatial gene expression patterns
+License: MIT + file LICENSE
+Encoding: UTF-8
+Roxygen: list(markdown = TRUE)
+RoxygenNote: 7.2.3
+Imports: 
+    fitdistrplus,
+    Matrix,
+    matrixStats,
+    splines,
+    stats
+Suggests: 
+    knitr,
+    rmarkdown
+VignetteBuilder: knitr
+URL: https://github.com/haotian-zhuang/PreTSA
+BugReports: https://github.com/haotian-zhuang/PreTSA/issues

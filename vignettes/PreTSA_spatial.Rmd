@@ -1,0 +1,74 @@
+---
+title: "Model spatial gene expression patterns"
+author: "Haotian Zhuang"
+output: rmarkdown::html_vignette
+vignette: >
+  %\VignetteIndexEntry{Model spatial gene expression patterns}
+  %\VignetteEngine{knitr::rmarkdown}
+  %\VignetteEncoding{UTF-8}
+date: '`r format(Sys.Date(), "%B %d, %Y")`'
+---
+
+```{r, include = FALSE}
+knitr::opts_chunk$set(
+  collapse = TRUE,
+  comment = "#>"
+)
+```
+
+# Introduction
+We will demonstrate how to use PreTSA to fit the gene expression along spatial locations and identify spatially variable genes (SVGs).
+
+The Visium dataset of a human heart tissue was downloaded from the [10x website](https://www.10xgenomics.com/resources/datasets/human-heart-1-standard-1-1-0). Mitochondrial genes and genes that are expressed in fewer than 50 spots were filtered out. We analyzed a final set of 11,953 genes on 4,247 spots. `SCTransform` with default settings was used to normalize the raw count data.
+
+# Load packages and datasets
+```{r setup}
+library(PreTSA)
+load(system.file("extdata", "heart", "heart_cleaned.Rdata", package = "PreTSA"))
+str(expr)
+str(coord)
+```
+
+# Fit the gene expression along spatial locations
+```{r}
+fitRes <- spatialFit(expr = expr, coord = coord, knot = F)
+str(fitRes)
+```
+
+The argument "knot" indicates whether to select the optimal number of knots automatically (FALSE by default). The argument "maxknotallowed" is the user-defined maximum number of knots (5 by default).
+
+```{r eval=FALSE}
+spatialFit(expr = expr, coord = coord, knot = T, maxknotallowed = 5)
+```
+
+# Identify spatially variable genes (SVGs)
+It returns a data frame with the p-value, FDR, and the number of knots selected for each gene.
+```{r}
+testRes <- spatialTest(expr = expr, coord = coord, knot = F)
+head(testRes)
+```
+
+# Visualize the fitted expression
+The fitted PreTSA expression can be seamlessly incorporated into the `Seurat` pipeline.
+```{r}
+library(ggplot2)
+library(Seurat)
+heart <- Load10X_Spatial(data.dir = system.file("extdata", "heart", package = "PreTSA"), filename = "V1_Human_Heart_filtered_feature_bc_matrix.h5")
+DefaultAssay(heart)
+heart[["Fitted"]] <- CreateAssayObject(data = fitRes)
+DefaultAssay(heart) <- "Fitted"
+```
+
+As an example, the fitted PreTSA expression of *MYH7* shows that spots in the right side have significantly lower expression levels than those in the left side.
+```{r}
+genename <- "MYH7"
+SpatialFeaturePlot(heart, features = genename) +
+  theme(legend.position = "right", legend.title = element_text(face = "italic"))
+```
+
+<details>
+  <summary>**Session Info**</summary>
+```{r}
+sessionInfo()
+```
+</details>

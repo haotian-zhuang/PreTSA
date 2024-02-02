@@ -1,0 +1,84 @@
+---
+title: "Model temporal gene expression patterns"
+author: "Haotian Zhuang"
+output: rmarkdown::html_vignette
+vignette: >
+  %\VignetteIndexEntry{Model temporal gene expression patterns}
+  %\VignetteEngine{knitr::rmarkdown}
+  %\VignetteEncoding{UTF-8}
+date: '`r format(Sys.Date(), "%B %d, %Y")`'
+---
+
+```{r, include = FALSE}
+knitr::opts_chunk$set(
+  collapse = TRUE,
+  comment = "#>"
+)
+```
+
+# Introduction
+We will demonstrate how to use PreTSA to fit the gene expression along pseudotime values and identify temporally variable genes (TVGs).
+
+The 3K peripheral blood mononuclear cells (PBMC3K) dataset was downloaded from the [10x website](https://www.10xgenomics.com/resources/datasets/3-k-pbm-cs-from-a-healthy-donor-1-standard-1-1-0). The processed PBMC3K dataset was downloaded using the R package `SeuratData`. `TSCAN` was used to construct a pseudotime trajectory from naive CD4 T cells to memory CD4 T cells with the top 10 principal components (PCs) and the cell clusters obtained from the dataset. Genes that are expressed in fewer than 5 cells within the trajectory were filtered out. We analyzed a final set of 10,509 genes on 1,180 cells.
+
+# Load packages and datasets
+```{r setup}
+library(PreTSA)
+load(system.file("extdata", "pbmc3k", "pbmc3k_cleaned.Rdata", package = "PreTSA"))
+str(expr)
+str(pseudotime)
+```
+
+# Fit the gene expression along pseudotime values
+```{r}
+fitRes <- temporalFit(expr = expr, pseudotime = pseudotime, knot = F)
+str(fitRes)
+```
+
+The argument "knot" indicates whether to select the optimal number of knots automatically (FALSE by default). The argument "maxknotallowed" is the user-defined maximum number of knots (10 by default).
+
+```{r eval=FALSE}
+temporalFit(expr = expr, pseudotime = pseudotime, knot = T, maxknotallowed = 10)
+```
+
+# Identify temporally variable genes (TVGs)
+To account for the pseudotime uncertainty, we apply the similar strategy used in `PseudotimeDE`. The argument "pseudotime_permute" is a list of permuted pseudotime values from subsampled cells. Each element in the list has the same format of the argument "pseudotime".
+```{r}
+pseudotime_permute <- readRDS(system.file("extdata", "pbmc3k", "pbmc3k_pseudotime_permute.rds", package = "PreTSA"))
+length(pseudotime_permute)
+str(pseudotime_permute[[1]])
+```
+
+```{r eval=FALSE}
+temporalTest(expr = expr, pseudotime = pseudotime, pseudotime_permute = pseudotime_permute, knot = F)
+```
+
+To reduce the computational time, users can ignore the pseudotime uncertainty, which is the default setting.
+```{r}
+testRes <- temporalTest(expr = expr, pseudotime = pseudotime, pseudotime_permute = NULL, knot = F)
+```
+
+It returns a data frame with the p-value, FDR, and the number of knots selected for each gene.
+```{r}
+head(testRes)
+```
+
+# Visualize the fitted expression
+As an example, *IL32* is an known gene associated to T cell activation process. The fitted PreTSA curve shows an increasing trend.
+```{r}
+library(ggplot2)
+genename <- "IL32"
+df.gene = data.frame(ptime = pseudotime, ori = expr[genename, ], pretsa = fitRes[genename, ])
+
+ggplot(data = df.gene) + geom_point(aes(x = ptime, y = ori), color = "orange") +
+  geom_line(aes(x = ptime, y = pretsa), linewidth = 2, color = "royalblue") +
+  labs(x = "Pseudotime", y = "Expression", title = genename) + theme_classic() +
+  theme(plot.title = element_text(hjust = 0.5, face = "italic"))
+```
+
+<details>
+  <summary>**Session Info**</summary>
+```{r}
+sessionInfo()
+```
+</details>
