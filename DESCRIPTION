@@ -19,5 +19,5 @@ Suggests:
     knitr,
     rmarkdown
 VignetteBuilder: knitr
-URL: https://github.com/haotian-zhuang/PreTSA
+URL: https://haotian-zhuang.github.io/PreTSA/, https://github.com/haotian-zhuang/PreTSA
 BugReports: https://github.com/haotian-zhuang/PreTSA/issues
