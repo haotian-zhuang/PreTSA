@@ -5,7 +5,7 @@
 #' @param knot Whether to select the optimal number of knots automatically
 #' @param maxknotallowed A user-defined maximum number of knots (5 by default)
 #'
-#' @return A data frame with the p-value and FDR for each gene (each row)
+#' @return A data frame with the p-value (FDR) and test statistic for each gene (each row)
 #' @export
 #'
 spatialTest <- function(expr, coord, knot = F, maxknotallowed = 5) {
@@ -34,9 +34,12 @@ spatialTest <- function(expr, coord, knot = F, maxknotallowed = 5) {
     if (any(SST<SSE)) print(names(which(SST<SSE)))
     
     fstat <- ((SST - SSE)/(ncol(B) - 1))/(SSE/(nrow(B) - ncol(B)))
-    pval <- stats::pf(q = fstat, df1 = ncol(B) - 1, df2 = nrow(B) - ncol(B), lower.tail = F)
+    fstat[which(Matrix::rowSums(expr) == 0)] <- 0
     
-    pval[which(Matrix::rowSums(expr) == 0)] <- 1
+    pval <- stats::pf(q = fstat, df1 = ncol(B) - 1, df2 = nrow(B) - ncol(B), lower.tail = F)
+    logpval <- stats::pf(q = fstat, df1 = ncol(B) - 1, df2 = nrow(B) - ncol(B), lower.tail = F, log.p = T)
+    
+    res <- data.frame(fstat = fstat, pval = pval, logpval = logpval)
     
   } else {
     
@@ -77,9 +80,8 @@ spatialTest <- function(expr, coord, knot = F, maxknotallowed = 5) {
     
     knotnum <- knotnum0[apply(bic, 1, which.min)]
     names(knotnum) <- rownames(bic)
-    print(table(knotnum))
     
-    pval <- lapply(unique(knotnum), function(k) {
+    res <- lapply(unique(knotnum), function(k) {
       
       B <- Blist[[as.character(k)]][['B']]
       tBB <- Blist[[as.character(k)]][['tBB']]
@@ -95,18 +97,22 @@ spatialTest <- function(expr, coord, knot = F, maxknotallowed = 5) {
       if (any(SST<SSE)) print(names(which(SST<SSE)))
       
       fstat <- ((SST - SSE)/(ncol(B) - 1))/(SSE/(nrow(B) - ncol(B)))
-      pval <- stats::pf(q = fstat, df1 = ncol(B) - 1, df2 = nrow(B) - ncol(B), lower.tail = F)
+      fstat[which(Matrix::colSums(expr.sub) == 0)] <- 0
       
-      pval[which(Matrix::colSums(expr.sub) == 0)] <- 1
-      pval
+      pval <- stats::pf(q = fstat, df1 = ncol(B) - 1, df2 = nrow(B) - ncol(B), lower.tail = F)
+      logpval <- stats::pf(q = fstat, df1 = ncol(B) - 1, df2 = nrow(B) - ncol(B), lower.tail = F, log.p = T)
+      
+      data.frame(fstat = fstat, pval = pval, logpval = logpval)
     })
     
-    pval <- unlist(pval)
-    pval <- pval[colnames(expr)]
+    res <- do.call(rbind, res)
+    res <- res[colnames(expr), ]
   }
   
-  fdr <- stats::p.adjust(pval, method = 'fdr')
-  res <- data.frame(fdr = fdr, pval = pval, knotnum = knotnum)
+  res$fdr <- stats::p.adjust(res$pval, method = 'fdr')
+  res$knotnum <- knotnum
+  res <- res[, c("fdr", "logpval", "pval", "fstat", "knotnum")]
+  res <- res[order(res$logpval, -res$fstat), ]
   return(res)
 }
 

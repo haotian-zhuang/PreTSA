@@ -36,7 +36,6 @@ str(fitRes)
 ```
 
 The argument "knot" indicates whether to select the optimal number of knots automatically (FALSE by default). The argument "maxknotallowed" is the user-defined maximum number of knots (10 by default).
-
 ```{r eval=FALSE}
 temporalFit(expr = expr, pseudotime = pseudotime, knot = T, maxknotallowed = 10)
 ```
@@ -49,18 +48,16 @@ length(pseudotime_permute)
 str(pseudotime_permute[[1]])
 ```
 
-```{r eval=FALSE}
-temporalTest(expr = expr, pseudotime = pseudotime, pseudotime_permute = pseudotime_permute, knot = F)
+It returns a data frame with the p-value, FDR, test statistic and number of knots selected for each gene. Genes are ordered first by p-value (increasing) then by test statistic (decreasing).
+```{r}
+testRes <- temporalTest(expr = expr[1:100, ], pseudotime = pseudotime, pseudotime_permute = pseudotime_permute, knot = F)
+head(testRes)
 ```
 
 To reduce the computational time, users can ignore the pseudotime uncertainty, which is the default setting.
 ```{r}
-testRes <- temporalTest(expr = expr, pseudotime = pseudotime, pseudotime_permute = NULL, knot = F)
-```
-
-It returns a data frame with the p-value, FDR, and the number of knots selected for each gene.
-```{r}
-head(testRes)
+testResFixed <- temporalTest(expr = expr, pseudotime = pseudotime, pseudotime_permute = NULL, knot = T, maxknotallowed = 10)
+head(testResFixed)
 ```
 
 # Visualize the fitted expression

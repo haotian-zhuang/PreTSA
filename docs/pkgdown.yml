@@ -4,7 +4,7 @@ pkgdown_sha: ~
 articles:
   PreTSA_spatial: PreTSA_spatial.html
   PreTSA_temporal: PreTSA_temporal.html
-last_built: 2024-02-02T07:00Z
+last_built: 2024-05-15T06:28Z
 urls:
   reference: https://haotian-zhuang.github.io/PreTSA/reference
   article: https://haotian-zhuang.github.io/PreTSA/articles

@@ -26,7 +26,7 @@
     
     <a class="navbar-brand me-2" href="../index.html">PreTSA</a>
 
-    <small class="nav-text text-muted me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="">1.0</small>
+    <small class="nav-text text-muted me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="">1.1</small>
 
     
     <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbar" aria-controls="navbar" aria-expanded="false" aria-label="Toggle navigation">
@@ -73,7 +73,7 @@
                         <h4 data-toc-skip class="author">Haotian
 Zhuang</h4>
             
-            <h4 data-toc-skip class="date">February 02, 2024</h4>
+            <h4 data-toc-skip class="date">May 15, 2024</h4>
       
       <small class="dont-index">Source: <a href="https://github.com/haotian-zhuang/PreTSA/blob/HEAD/vignettes/PreTSA_temporal.Rmd" class="external-link"><code>vignettes/PreTSA_temporal.Rmd</code></a></small>
       <div class="d-none name"><code>PreTSA_temporal.Rmd</code></div>
@@ -149,23 +149,31 @@ argument “pseudotime”.</p>
 <span><span class="fu"><a href="https://rdrr.io/r/utils/str.html" class="external-link">str</a></span><span class="op">(</span><span class="va">pseudotime_permute</span><span class="op">[[</span><span class="fl">1</span><span class="op">]</span><span class="op">]</span><span class="op">)</span></span>
 <span><span class="co">#&gt;  Named int [1:944] 1 2 3 4 5 6 7 8 9 10 ...</span></span>
 <span><span class="co">#&gt;  - attr(*, "names")= chr [1:944] "AAATTCGAGGAGTG" "GAGATGCTGAATGA" "TATCTTCTAAACAG" "GCAAGACTACTGGT" ...</span></span></code></pre></div>
+<p>It returns a data frame with the p-value, FDR, test statistic and
+number of knots selected for each gene. Genes are ordered first by
+p-value (increasing) then by test statistic (decreasing).</p>
 <div class="sourceCode" id="cb5"><pre class="downlit sourceCode r">
-<code class="sourceCode R"><span><span class="fu"><a href="../reference/temporalTest.html">temporalTest</a></span><span class="op">(</span>expr <span class="op">=</span> <span class="va">expr</span>, pseudotime <span class="op">=</span> <span class="va">pseudotime</span>, pseudotime_permute <span class="op">=</span> <span class="va">pseudotime_permute</span>, knot <span class="op">=</span> <span class="cn">F</span><span class="op">)</span></span></code></pre></div>
+<code class="sourceCode R"><span><span class="va">testRes</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/temporalTest.html">temporalTest</a></span><span class="op">(</span>expr <span class="op">=</span> <span class="va">expr</span><span class="op">[</span><span class="fl">1</span><span class="op">:</span><span class="fl">100</span>, <span class="op">]</span>, pseudotime <span class="op">=</span> <span class="va">pseudotime</span>, pseudotime_permute <span class="op">=</span> <span class="va">pseudotime_permute</span>, knot <span class="op">=</span> <span class="cn">F</span><span class="op">)</span></span>
+<span><span class="fu"><a href="https://rdrr.io/r/utils/head.html" class="external-link">head</a></span><span class="op">(</span><span class="va">testRes</span><span class="op">)</span></span>
+<span><span class="co">#&gt;          fdr.parametric pval.parametric fdr.empirical pval.empirical fstat.ori</span></span>
+<span><span class="co">#&gt; ISG15      4.939088e-19    4.939088e-21    0.07616146     0.00990099  28.32494</span></span>
+<span><span class="co">#&gt; TNFRSF4    1.787031e-13    3.574063e-15    0.07616146     0.00990099  26.34783</span></span>
+<span><span class="co">#&gt; ENO1       1.979526e-10    5.938578e-12    0.07616146     0.00990099  18.76528</span></span>
+<span><span class="co">#&gt; RPL22      4.865585e-09    1.946234e-10    0.07616146     0.00990099  14.92563</span></span>
+<span><span class="co">#&gt; TNFRSF25   2.798111e-08    1.399055e-09    0.07616146     0.00990099  14.02817</span></span>
+<span><span class="co">#&gt; RER1       4.449211e-07    2.823722e-08    0.07616146     0.00990099  14.15083</span></span></code></pre></div>
 <p>To reduce the computational time, users can ignore the pseudotime
 uncertainty, which is the default setting.</p>
 <div class="sourceCode" id="cb6"><pre class="downlit sourceCode r">
-<code class="sourceCode R"><span><span class="va">testRes</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/temporalTest.html">temporalTest</a></span><span class="op">(</span>expr <span class="op">=</span> <span class="va">expr</span>, pseudotime <span class="op">=</span> <span class="va">pseudotime</span>, pseudotime_permute <span class="op">=</span> <span class="cn">NULL</span>, knot <span class="op">=</span> <span class="cn">F</span><span class="op">)</span></span></code></pre></div>
-<p>It returns a data frame with the p-value, FDR, and the number of
-knots selected for each gene.</p>
-<div class="sourceCode" id="cb7"><pre class="downlit sourceCode r">
-<code class="sourceCode R"><span><span class="fu"><a href="https://rdrr.io/r/utils/head.html" class="external-link">head</a></span><span class="op">(</span><span class="va">testRes</span><span class="op">)</span></span>
-<span><span class="co">#&gt;                    fdr         pval knotnum</span></span>
-<span><span class="co">#&gt; LINC00115 9.784399e-01 9.589589e-01       0</span></span>
-<span><span class="co">#&gt; NOC2L     8.891055e-01 7.825888e-01       0</span></span>
-<span><span class="co">#&gt; HES4      9.999038e-01 9.998087e-01       0</span></span>
-<span><span class="co">#&gt; ISG15     2.309152e-15 1.098654e-17       0</span></span>
-<span><span class="co">#&gt; C1orf159  2.306248e-01 5.202783e-02       0</span></span>
-<span><span class="co">#&gt; TNFRSF18  1.130205e-06 2.097155e-08       0</span></span></code></pre></div>
+<code class="sourceCode R"><span><span class="va">testResFixed</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/temporalTest.html">temporalTest</a></span><span class="op">(</span>expr <span class="op">=</span> <span class="va">expr</span>, pseudotime <span class="op">=</span> <span class="va">pseudotime</span>, pseudotime_permute <span class="op">=</span> <span class="cn">NULL</span>, knot <span class="op">=</span> <span class="cn">T</span>, maxknotallowed <span class="op">=</span> <span class="fl">10</span><span class="op">)</span></span>
+<span><span class="fu"><a href="https://rdrr.io/r/utils/head.html" class="external-link">head</a></span><span class="op">(</span><span class="va">testResFixed</span><span class="op">)</span></span>
+<span><span class="co">#&gt;                   fdr   logpval         pval     fstat knotnum</span></span>
+<span><span class="co">#&gt; S100A4   5.688841e-65 -157.1895 5.413304e-69 122.40125       0</span></span>
+<span><span class="co">#&gt; KIAA0101 5.939572e-60 -144.9403 1.130378e-63  29.69045      10</span></span>
+<span><span class="co">#&gt; MALAT1   4.759637e-58 -140.1511 1.358732e-61 107.66759       0</span></span>
+<span><span class="co">#&gt; ANXA1    5.577562e-42 -102.8635 2.122966e-45  76.85722       0</span></span>
+<span><span class="co">#&gt; B2M      5.982524e-41 -100.2677 2.846381e-44  74.78293       0</span></span>
+<span><span class="co">#&gt; S100A11  2.061180e-37  -91.9406 1.176808e-40  68.18884       0</span></span></code></pre></div>
 </div>
 <div class="section level2">
 <h2 id="visualize-the-fitted-expression">Visualize the fitted expression<a class="anchor" aria-label="anchor" href="#visualize-the-fitted-expression"></a>
@@ -173,7 +181,7 @@ knots selected for each gene.</p>
 <p>As an example, <em>IL32</em> is an known gene associated to T cell
 activation process. The fitted PreTSA curve shows an increasing
 trend.</p>
-<div class="sourceCode" id="cb8"><pre class="downlit sourceCode r">
+<div class="sourceCode" id="cb7"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="kw"><a href="https://rdrr.io/r/base/library.html" class="external-link">library</a></span><span class="op">(</span><span class="va"><a href="https://ggplot2.tidyverse.org" class="external-link">ggplot2</a></span><span class="op">)</span></span>
 <span><span class="va">genename</span> <span class="op">&lt;-</span> <span class="st">"IL32"</span></span>
 <span><span class="va">df.gene</span> <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/data.frame.html" class="external-link">data.frame</a></span><span class="op">(</span>ptime <span class="op">=</span> <span class="va">pseudotime</span>, ori <span class="op">=</span> <span class="va">expr</span><span class="op">[</span><span class="va">genename</span>, <span class="op">]</span>, pretsa <span class="op">=</span> <span class="va">fitRes</span><span class="op">[</span><span class="va">genename</span>, <span class="op">]</span><span class="op">)</span></span>
@@ -182,9 +190,9 @@ trend.</p>
 <span>  <span class="fu"><a href="https://ggplot2.tidyverse.org/reference/geom_path.html" class="external-link">geom_line</a></span><span class="op">(</span><span class="fu"><a href="https://ggplot2.tidyverse.org/reference/aes.html" class="external-link">aes</a></span><span class="op">(</span>x <span class="op">=</span> <span class="va">ptime</span>, y <span class="op">=</span> <span class="va">pretsa</span><span class="op">)</span>, linewidth <span class="op">=</span> <span class="fl">2</span>, color <span class="op">=</span> <span class="st">"royalblue"</span><span class="op">)</span> <span class="op">+</span></span>
 <span>  <span class="fu"><a href="https://ggplot2.tidyverse.org/reference/labs.html" class="external-link">labs</a></span><span class="op">(</span>x <span class="op">=</span> <span class="st">"Pseudotime"</span>, y <span class="op">=</span> <span class="st">"Expression"</span>, title <span class="op">=</span> <span class="va">genename</span><span class="op">)</span> <span class="op">+</span> <span class="fu"><a href="https://ggplot2.tidyverse.org/reference/ggtheme.html" class="external-link">theme_classic</a></span><span class="op">(</span><span class="op">)</span> <span class="op">+</span></span>
 <span>  <span class="fu"><a href="https://ggplot2.tidyverse.org/reference/theme.html" class="external-link">theme</a></span><span class="op">(</span>plot.title <span class="op">=</span> <span class="fu"><a href="https://ggplot2.tidyverse.org/reference/element.html" class="external-link">element_text</a></span><span class="op">(</span>hjust <span class="op">=</span> <span class="fl">0.5</span>, face <span class="op">=</span> <span class="st">"italic"</span><span class="op">)</span><span class="op">)</span></span></code></pre></div>
-<p><img src="PreTSA_temporal_files/figure-html/unnamed-chunk-8-1.png" width="700"></p>
+<p><img src="PreTSA_temporal_files/figure-html/unnamed-chunk-7-1.png" width="700"></p>
 <details><summary><strong>Session Info</strong>
-</summary><div class="sourceCode" id="cb9"><pre class="downlit sourceCode r">
+</summary><div class="sourceCode" id="cb8"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="fu"><a href="https://rdrr.io/r/utils/sessionInfo.html" class="external-link">sessionInfo</a></span><span class="op">(</span><span class="op">)</span></span>
 <span><span class="co">#&gt; R version 4.2.1 (2022-06-23)</span></span>
 <span><span class="co">#&gt; Platform: x86_64-apple-darwin17.0 (64-bit)</span></span>
@@ -201,23 +209,24 @@ trend.</p>
 <span><span class="co">#&gt; [1] stats     graphics  grDevices utils     datasets  methods   base     </span></span>
 <span><span class="co">#&gt; </span></span>
 <span><span class="co">#&gt; other attached packages:</span></span>
-<span><span class="co">#&gt; [1] ggplot2_3.4.2 Matrix_1.5-1  PreTSA_1.0   </span></span>
+<span><span class="co">#&gt; [1] ggplot2_3.4.2 Matrix_1.5-1  PreTSA_1.1   </span></span>
 <span><span class="co">#&gt; </span></span>
 <span><span class="co">#&gt; loaded via a namespace (and not attached):</span></span>
 <span><span class="co">#&gt;  [1] highr_0.10         pillar_1.8.1       bslib_0.4.2        compiler_4.2.1    </span></span>
-<span><span class="co">#&gt;  [5] jquerylib_0.1.4    tools_4.2.1        digest_0.6.31      tibble_3.2.1      </span></span>
-<span><span class="co">#&gt;  [9] jsonlite_1.8.4     evaluate_0.19      memoise_2.0.1      lifecycle_1.0.3   </span></span>
-<span><span class="co">#&gt; [13] gtable_0.3.1       lattice_0.20-45    pkgconfig_2.0.3    rlang_1.1.0       </span></span>
-<span><span class="co">#&gt; [17] cli_3.6.1          rstudioapi_0.14    yaml_2.3.6         pkgdown_2.0.7     </span></span>
-<span><span class="co">#&gt; [21] xfun_0.39          fastmap_1.1.0      withr_2.5.0        dplyr_1.1.1       </span></span>
-<span><span class="co">#&gt; [25] stringr_1.5.0      knitr_1.41         generics_0.1.3     desc_1.4.2        </span></span>
-<span><span class="co">#&gt; [29] fs_1.5.2           vctrs_0.6.1        sass_0.4.4         systemfonts_1.0.4 </span></span>
-<span><span class="co">#&gt; [33] tidyselect_1.2.0   rprojroot_2.0.3    grid_4.2.1         glue_1.6.2        </span></span>
-<span><span class="co">#&gt; [37] R6_2.5.1           textshaping_0.3.6  fansi_1.0.3        rmarkdown_2.19    </span></span>
-<span><span class="co">#&gt; [41] farver_2.1.1       purrr_1.0.1        magrittr_2.0.3     scales_1.2.1      </span></span>
-<span><span class="co">#&gt; [45] htmltools_0.5.4    matrixStats_0.63.0 splines_4.2.1      colorspace_2.0-3  </span></span>
-<span><span class="co">#&gt; [49] labeling_0.4.2     ragg_1.2.5         utf8_1.2.2         stringi_1.7.8     </span></span>
-<span><span class="co">#&gt; [53] munsell_0.5.0      cachem_1.0.6</span></span></code></pre></div>
+<span><span class="co">#&gt;  [5] jquerylib_0.1.4    tools_4.2.1        fitdistrplus_1.1-8 digest_0.6.31     </span></span>
+<span><span class="co">#&gt;  [9] tibble_3.2.1       gtable_0.3.1       jsonlite_1.8.4     evaluate_0.19     </span></span>
+<span><span class="co">#&gt; [13] memoise_2.0.1      lifecycle_1.0.3    lattice_0.20-45    pkgconfig_2.0.3   </span></span>
+<span><span class="co">#&gt; [17] rlang_1.1.0        cli_3.6.1          rstudioapi_0.14    yaml_2.3.6        </span></span>
+<span><span class="co">#&gt; [21] pkgdown_2.0.7      xfun_0.39          fastmap_1.1.0      withr_2.5.0       </span></span>
+<span><span class="co">#&gt; [25] dplyr_1.1.1        stringr_1.5.0      knitr_1.41         generics_0.1.3    </span></span>
+<span><span class="co">#&gt; [29] desc_1.4.2         fs_1.5.2           vctrs_0.6.1        sass_0.4.4        </span></span>
+<span><span class="co">#&gt; [33] systemfonts_1.0.4  tidyselect_1.2.0   rprojroot_2.0.3    grid_4.2.1        </span></span>
+<span><span class="co">#&gt; [37] glue_1.6.2         R6_2.5.1           textshaping_0.3.6  fansi_1.0.3       </span></span>
+<span><span class="co">#&gt; [41] survival_3.3-1     rmarkdown_2.19     farver_2.1.1       purrr_1.0.1       </span></span>
+<span><span class="co">#&gt; [45] magrittr_2.0.3     scales_1.2.1       htmltools_0.5.4    matrixStats_0.63.0</span></span>
+<span><span class="co">#&gt; [49] splines_4.2.1      MASS_7.3-57        colorspace_2.0-3   labeling_0.4.2    </span></span>
+<span><span class="co">#&gt; [53] ragg_1.2.5         utf8_1.2.2         stringi_1.7.8      munsell_0.5.0     </span></span>
+<span><span class="co">#&gt; [57] cachem_1.0.6</span></span></code></pre></div>
 </details>
 </div>
   </main><aside class="col-md-3"><nav id="toc"><h2>On this page</h2>

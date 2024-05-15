@@ -26,7 +26,7 @@
     
     <a class="navbar-brand me-2" href="../index.html">PreTSA</a>
 
-    <small class="nav-text text-muted me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="">1.0</small>
+    <small class="nav-text text-muted me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="">1.1</small>
 
     
     <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbar" aria-controls="navbar" aria-expanded="false" aria-label="Toggle navigation">
@@ -73,7 +73,7 @@
                         <h4 data-toc-skip class="author">Haotian
 Zhuang</h4>
             
-            <h4 data-toc-skip class="date">February 02, 2024</h4>
+            <h4 data-toc-skip class="date">May 15, 2024</h4>
       
       <small class="dont-index">Source: <a href="https://github.com/haotian-zhuang/PreTSA/blob/HEAD/vignettes/PreTSA_spatial.Rmd" class="external-link"><code>vignettes/PreTSA_spatial.Rmd</code></a></small>
       <div class="d-none name"><code>PreTSA_spatial.Rmd</code></div>
@@ -135,18 +135,19 @@ the user-defined maximum number of knots (5 by default).</p>
 <div class="section level2">
 <h2 id="identify-spatially-variable-genes-svgs">Identify spatially variable genes (SVGs)<a class="anchor" aria-label="anchor" href="#identify-spatially-variable-genes-svgs"></a>
 </h2>
-<p>It returns a data frame with the p-value, FDR, and the number of
-knots selected for each gene.</p>
+<p>It returns a data frame with the p-value, log(p-value), FDR, test
+statistic and number of knots selected for each gene. Genes are ordered
+first by p-value (increasing) then by test statistic (decreasing).</p>
 <div class="sourceCode" id="cb4"><pre class="downlit sourceCode r">
-<code class="sourceCode R"><span><span class="va">testRes</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/spatialTest.html">spatialTest</a></span><span class="op">(</span>expr <span class="op">=</span> <span class="va">expr</span>, coord <span class="op">=</span> <span class="va">coord</span>, knot <span class="op">=</span> <span class="cn">F</span><span class="op">)</span></span>
+<code class="sourceCode R"><span><span class="va">testRes</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/spatialTest.html">spatialTest</a></span><span class="op">(</span>expr <span class="op">=</span> <span class="va">expr</span>, coord <span class="op">=</span> <span class="va">coord</span>, knot <span class="op">=</span> <span class="cn">T</span>, maxknotallowed <span class="op">=</span> <span class="fl">5</span><span class="op">)</span></span>
 <span><span class="fu"><a href="https://rdrr.io/r/utils/head.html" class="external-link">head</a></span><span class="op">(</span><span class="va">testRes</span><span class="op">)</span></span>
-<span><span class="co">#&gt;                    fdr         pval knotnum</span></span>
-<span><span class="co">#&gt; LINC01409 3.707785e-01 2.210843e-01       0</span></span>
-<span><span class="co">#&gt; LINC01128 1.314814e-01 4.623516e-02       0</span></span>
-<span><span class="co">#&gt; NOC2L     4.960952e-01 3.468474e-01       0</span></span>
-<span><span class="co">#&gt; PERM1     2.940015e-01 1.544033e-01       0</span></span>
-<span><span class="co">#&gt; HES4      6.518492e-02 1.686202e-02       0</span></span>
-<span><span class="co">#&gt; ISG15     1.017506e-29 3.405022e-32       0</span></span></code></pre></div>
+<span><span class="co">#&gt;                 fdr   logpval          pval     fstat knotnum</span></span>
+<span><span class="co">#&gt; ACTA1 5.060461e-285 -664.0040 4.233632e-289 110.25955       0</span></span>
+<span><span class="co">#&gt; MYL2  1.319638e-260 -607.0904 2.208045e-264  45.87531       2</span></span>
+<span><span class="co">#&gt; FOS   1.289185e-176 -413.2911 3.235637e-180  23.64024       3</span></span>
+<span><span class="co">#&gt; SPP1  2.168934e-172 -403.2728 7.258207e-176  15.32513       5</span></span>
+<span><span class="co">#&gt; JUNB  1.439367e-155 -364.3158 6.020945e-159  20.96449       3</span></span>
+<span><span class="co">#&gt; MYH7  1.884805e-128 -301.6940 9.461081e-132  47.83705       0</span></span></code></pre></div>
 </div>
 <div class="section level2">
 <h2 id="visualize-the-fitted-expression">Visualize the fitted expression<a class="anchor" aria-label="anchor" href="#visualize-the-fitted-expression"></a>
@@ -189,7 +190,7 @@ than those in the left side.</p>
 <span><span class="co">#&gt; </span></span>
 <span><span class="co">#&gt; other attached packages:</span></span>
 <span><span class="co">#&gt; [1] SeuratObject_4.1.3 Seurat_4.3.0       ggplot2_3.4.2      Matrix_1.5-1      </span></span>
-<span><span class="co">#&gt; [5] PreTSA_1.0        </span></span>
+<span><span class="co">#&gt; [5] PreTSA_1.1        </span></span>
 <span><span class="co">#&gt; </span></span>
 <span><span class="co">#&gt; loaded via a namespace (and not attached):</span></span>
 <span><span class="co">#&gt;   [1] Rtsne_0.16             colorspace_2.0-3       deldir_1.0-6          </span></span>

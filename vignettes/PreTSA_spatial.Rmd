@@ -36,15 +36,14 @@ str(fitRes)
 ```
 
 The argument "knot" indicates whether to select the optimal number of knots automatically (FALSE by default). The argument "maxknotallowed" is the user-defined maximum number of knots (5 by default).
-
 ```{r eval=FALSE}
 spatialFit(expr = expr, coord = coord, knot = T, maxknotallowed = 5)
 ```
 
 # Identify spatially variable genes (SVGs)
-It returns a data frame with the p-value, FDR, and the number of knots selected for each gene.
+It returns a data frame with the p-value, log(p-value), FDR, test statistic and number of knots selected for each gene. Genes are ordered first by p-value (increasing) then by test statistic (decreasing).
 ```{r}
-testRes <- spatialTest(expr = expr, coord = coord, knot = F)
+testRes <- spatialTest(expr = expr, coord = coord, knot = T, maxknotallowed = 5)
 head(testRes)
 ```
 

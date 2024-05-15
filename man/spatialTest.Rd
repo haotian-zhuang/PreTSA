@@ -16,7 +16,7 @@ spatialTest(expr, coord, knot = F, maxknotallowed = 5)
 \item{maxknotallowed}{A user-defined maximum number of knots (5 by default)}
 }
 \value{
-A data frame with the p-value and FDR for each gene (each row)
+A data frame with the p-value (FDR) and test statistic for each gene (each row)
 }
 \description{
 Test if the gene expression is associated with spatial locations

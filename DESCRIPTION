@@ -1,6 +1,6 @@
 Package: PreTSA
 Title: Pattern recognition in Temporal and Spatial Analyses
-Version: 1.0
+Version: 1.1
 Authors@R: c(
     person("Haotian", "Zhuang", email = "haotian.zhuang@duke.edu", role = c("aut", "cre"), comment = c(ORCID = "0000-0003-0513-748X")),
     person("Zhicheng", "Ji", email = "zhicheng.ji@duke.edu", role = "aut", comment = c(ORCID = "0000-0002-9457-4704")))

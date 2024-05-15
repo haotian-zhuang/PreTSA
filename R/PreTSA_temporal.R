@@ -6,14 +6,14 @@
 #' @param knot Whether to select the optimal number of knots automatically
 #' @param maxknotallowed A user-defined maximum number of knots (10 by default)
 #'
-#' @return A data frame with the p-value and FDR for each gene (each row)
+#' @return A data frame with the p-value (FDR) and test statistic for each gene (each row)
 #' @export
 #'
 temporalTest<- function(expr, pseudotime, pseudotime_permute = NULL, knot = F, maxknotallowed = 10) {
   
   if(is.null(pseudotime_permute)) {
-    return(temporalTest.fix(expr = expr, pseudotime = pseudotime,
-                            knot = knot, maxknotallowed = maxknotallowed))
+    return(temporalTestFixed(expr = expr, pseudotime = pseudotime,
+                             knot = knot, maxknotallowed = maxknotallowed))
   } else {
     fstat.ori <- Calfstat(expr = expr, pseudotime = pseudotime,
                           knot = knot, maxknotallowed = maxknotallowed)
@@ -37,7 +37,9 @@ temporalTest<- function(expr, pseudotime, pseudotime_permute = NULL, knot = F, m
     fdr.empirical <- stats::p.adjust(pval.empirical, method = 'fdr')
     fdr.parametric <- stats::p.adjust(pval.parametric, method = 'fdr')
     res <- data.frame(fdr.parametric = fdr.parametric, pval.parametric = pval.parametric,
-                      fdr.empirical = fdr.empirical, pval.empirical = pval.empirical)
+                      fdr.empirical = fdr.empirical, pval.empirical = pval.empirical,
+                      fstat.ori = fstat.ori)
+    res <- res[order(res$pval.parametric, res$pval.empirical, -res$fstat.ori), ]
     return(res)
   }
 }
@@ -131,7 +133,7 @@ Calfstat <- function(expr, pseudotime, knot = F, maxknotallowed = 10){
   }
 }
 
-temporalTest.fix <- function(expr, pseudotime, knot = F, maxknotallowed = 10) {
+temporalTestFixed <- function(expr, pseudotime, knot = F, maxknotallowed = 10) {
   
   expr <- expr[, names(pseudotime), drop = F]
   if(knot == F) {
@@ -154,9 +156,12 @@ temporalTest.fix <- function(expr, pseudotime, knot = F, maxknotallowed = 10) {
     if (any(SST<SSE)) print(names(which(SST<SSE)))
     
     fstat <- ((SST - SSE)/(ncol(B) - 1))/(SSE/(nrow(B) - ncol(B)))
-    pval <- stats::pf(q = fstat, df1 = ncol(B) - 1, df2 = nrow(B) - ncol(B), lower.tail = F)
+    fstat[which(Matrix::rowSums(expr) == 0)] <- 0
     
-    pval[which(Matrix::rowSums(expr) == 0)] <- 1
+    pval <- stats::pf(q = fstat, df1 = ncol(B) - 1, df2 = nrow(B) - ncol(B), lower.tail = F)
+    logpval <- stats::pf(q = fstat, df1 = ncol(B) - 1, df2 = nrow(B) - ncol(B), lower.tail = F, log.p = T)
+    
+    res <- data.frame(fstat = fstat, pval = pval, logpval = logpval)
     
   } else {
     
@@ -194,9 +199,8 @@ temporalTest.fix <- function(expr, pseudotime, knot = F, maxknotallowed = 10) {
     
     knotnum <- knotnum0[apply(bic, 1, which.min)]
     names(knotnum) <- rownames(bic)
-    print(table(knotnum))
     
-    pval <- lapply(unique(knotnum), function(k) {
+    res <- lapply(unique(knotnum), function(k) {
       
       B <- Blist[[as.character(k)]][['B']]
       tBB <- Blist[[as.character(k)]][['tBB']]
@@ -212,18 +216,22 @@ temporalTest.fix <- function(expr, pseudotime, knot = F, maxknotallowed = 10) {
       if (any(SST<SSE)) print(names(which(SST<SSE)))
       
       fstat <- ((SST - SSE)/(ncol(B) - 1))/(SSE/(nrow(B) - ncol(B)))
-      pval <- stats::pf(q = fstat, df1 = ncol(B) - 1, df2 = nrow(B) - ncol(B), lower.tail = F)
+      fstat[which(Matrix::colSums(expr.sub) == 0)] <- 0
       
-      pval[which(Matrix::colSums(expr.sub) == 0)] <- 1
-      pval
+      pval <- stats::pf(q = fstat, df1 = ncol(B) - 1, df2 = nrow(B) - ncol(B), lower.tail = F)
+      logpval <- stats::pf(q = fstat, df1 = ncol(B) - 1, df2 = nrow(B) - ncol(B), lower.tail = F, log.p = T)
+      
+      data.frame(fstat = fstat, pval = pval, logpval = logpval)
     })
     
-    pval <- unlist(pval)
-    pval <- pval[colnames(expr)]
+    res <- do.call(rbind, res)
+    res <- res[colnames(expr), ]
   }
   
-  fdr <- stats::p.adjust(pval, method = 'fdr')
-  res <- data.frame(fdr = fdr, pval = pval, knotnum = knotnum)
+  res$fdr <- stats::p.adjust(res$pval, method = 'fdr')
+  res$knotnum <- knotnum
+  res <- res[, c("fdr", "logpval", "pval", "fstat", "knotnum")]
+  res <- res[order(res$logpval, -res$fstat), ]
   return(res)
 }
 
