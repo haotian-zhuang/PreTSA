@@ -3,13 +3,13 @@
 #' @param expr The normalized gene expression matrix. Rows represent genes and columns represent cells
 #' @param pseudotime The vector of user-provided pseudotime values
 #' @param pseudotime_permute A list of permuted pseudotime values from subsampled cells. Each element in the list has the same format of the argument `pseudotime`
-#' @param knot Whether to select the optimal number of knots automatically
+#' @param knot Number of knots (0 by default) or \code{"auto"} for automatic selection
 #' @param maxknotallowed A user-defined maximum number of knots (10 by default)
 #'
 #' @return A data frame with the p-value (FDR) and test statistic for each gene (each row)
 #' @export
 #'
-temporalTest<- function(expr, pseudotime, pseudotime_permute = NULL, knot = F, maxknotallowed = 10) {
+temporalTest <- function(expr, pseudotime, pseudotime_permute = NULL, knot = 0, maxknotallowed = 10) {
   
   if(is.null(pseudotime_permute)) {
     return(temporalTestFixed(expr = expr, pseudotime = pseudotime,
@@ -36,10 +36,10 @@ temporalTest<- function(expr, pseudotime, pseudotime_permute = NULL, knot = F, m
     
     fdr.empirical <- stats::p.adjust(pval.empirical, method = 'fdr')
     fdr.parametric <- stats::p.adjust(pval.parametric, method = 'fdr')
-    res <- data.frame(fdr.parametric = fdr.parametric, pval.parametric = pval.parametric,
+    res <- data.frame(fdr = fdr.parametric, pval = pval.parametric,
                       fdr.empirical = fdr.empirical, pval.empirical = pval.empirical,
                       fstat.ori = fstat.ori)
-    res <- res[order(res$pval.parametric, res$pval.empirical, -res$fstat.ori), ]
+    res <- res[order(res$pval, res$pval.empirical, -res$fstat.ori), ]
     return(res)
   }
 }
@@ -133,14 +133,14 @@ Calfstat <- function(expr, pseudotime, knot = F, maxknotallowed = 10){
   }
 }
 
-temporalTestFixed <- function(expr, pseudotime, knot = F, maxknotallowed = 10) {
+temporalTestFixed <- function(expr, pseudotime, knot = 0, maxknotallowed = 10) {
   
   expr <- expr[, names(pseudotime), drop = F]
-  if(knot == F) {
+  if(knot != "auto") {
     
-    knotnum <- rep(0, nrow(expr))
+    knotnum <- rep(knot, nrow(expr))
     names(knotnum) <- rownames(expr)
-    B <- splines::bs(pseudotime, intercept = F, df = 3)
+    B <- splines::bs(pseudotime, intercept = F, df = knot+3)
     B <- B[, which(matrixStats::colSds(B)>0), drop = F]
     B <- cbind(1, B)
     rownames(B) <- colnames(expr)
@@ -231,7 +231,7 @@ temporalTestFixed <- function(expr, pseudotime, knot = F, maxknotallowed = 10) {
   res$fdr <- stats::p.adjust(res$pval, method = 'fdr')
   res$knotnum <- knotnum
   res <- res[, c("fdr", "logpval", "pval", "fstat", "knotnum")]
-  res <- res[order(res$logpval, -res$fstat), ]
+  res <- res[order(res$pval, -res$fstat), ]
   return(res)
 }
 
@@ -239,20 +239,20 @@ temporalTestFixed <- function(expr, pseudotime, knot = F, maxknotallowed = 10) {
 #'
 #' @param expr The normalized gene expression matrix. Rows represent genes and columns represent cells
 #' @param pseudotime The vector of user-provided pseudotime values
-#' @param knot Whether to select the optimal number of knots automatically
+#' @param knot Number of knots (0 by default) or \code{"auto"} for automatic selection
 #' @param maxknotallowed A user-defined maximum number of knots (10 by default)
 #'
 #' @return The fitted expression matrix. Rows represent genes and columns represent cells
 #' @export
 #'
-temporalFit <- function(expr, pseudotime, knot = F, maxknotallowed = 10) {
+temporalFit <- function(expr, pseudotime, knot = 0, maxknotallowed = 10) {
   
   expr <- expr[, names(pseudotime), drop = F]
-  if(knot == F) {
+  if(knot != "auto") {
     
-    knotnum <- rep(0, nrow(expr))
+    knotnum <- rep(knot, nrow(expr))
     names(knotnum) <- rownames(expr)
-    B <- splines::bs(pseudotime, intercept = F, df = 3)
+    B <- splines::bs(pseudotime, intercept = F, df = knot+3)
     B <- B[, which(matrixStats::colSds(B)>0), drop = F]
     B <- cbind(1, B)
     rownames(B) <- colnames(expr)
@@ -317,7 +317,7 @@ temporalFit <- function(expr, pseudotime, knot = F, maxknotallowed = 10) {
   }
 }
 
-Calbic<- function(numknot, Blist, expr) {
+Calbic <- function(numknot, Blist, expr) {
   
   B <- Blist[[as.character(numknot)]][['B']]
   tBB <- Blist[[as.character(numknot)]][['tBB']]

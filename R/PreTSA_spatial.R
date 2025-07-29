@@ -2,21 +2,21 @@
 #'
 #' @param expr The normalized gene expression matrix. Rows represent genes and columns represent spots/cells
 #' @param coord The matrix of spatial locations. Rows represent spots/cells. The column named "row" ("col") represents row (column) coordinates
-#' @param knot Whether to select the optimal number of knots automatically
+#' @param knot Number of knots (0 by default) or \code{"auto"} for automatic selection
 #' @param maxknotallowed A user-defined maximum number of knots (5 by default)
 #'
 #' @return A data frame with the p-value (FDR) and test statistic for each gene (each row)
 #' @export
 #'
-spatialTest <- function(expr, coord, knot = F, maxknotallowed = 5) {
+spatialTest <- function(expr, coord, knot = 0, maxknotallowed = 5) {
   
   expr <- expr[, rownames(coord), drop = F]
-  if(knot == F) {
+  if(knot != "auto") {
     
-    knotnum <- rep(0, nrow(expr))
+    knotnum <- rep(knot, nrow(expr))
     names(knotnum) <- rownames(expr)
-    xrow <- cbind(1, splines::bs(coord[,'row'], intercept = F, df = 3))
-    ycol <- cbind(1, splines::bs(coord[,'col'], intercept = F, df = 3))
+    xrow <- cbind(1, splines::bs(coord[,'row'], intercept = F, df = knot+3))
+    ycol <- cbind(1, splines::bs(coord[,'col'], intercept = F, df = knot+3))
     
     B <- xrow[,rep(1:ncol(xrow), ncol(xrow))] * ycol[,rep(1:ncol(ycol), each = ncol(ycol))]
     B <- B[, which(matrixStats::colSds(B)>0), drop = F]
@@ -112,7 +112,7 @@ spatialTest <- function(expr, coord, knot = F, maxknotallowed = 5) {
   res$fdr <- stats::p.adjust(res$pval, method = 'fdr')
   res$knotnum <- knotnum
   res <- res[, c("fdr", "logpval", "pval", "fstat", "knotnum")]
-  res <- res[order(res$logpval, -res$fstat), ]
+  res <- res[order(res$pval, -res$fstat), ]
   return(res)
 }
 
@@ -120,21 +120,21 @@ spatialTest <- function(expr, coord, knot = F, maxknotallowed = 5) {
 #'
 #' @param expr The normalized gene expression matrix. Rows represent genes and columns represent spots/cells
 #' @param coord The matrix of spatial locations. Rows represent spots/cells. The column named "row" ("col") represents row (column) coordinates
-#' @param knot Whether to select the optimal number of knots automatically
+#' @param knot Number of knots (0 by default) or \code{"auto"} for automatic selection
 #' @param maxknotallowed A user-defined maximum number of knots (5 by default)
 #'
 #' @return The fitted expression matrix. Rows represent genes and columns represent spots/cells
 #' @export
 #'
-spatialFit <- function(expr, coord, knot = F, maxknotallowed = 5) {
+spatialFit <- function(expr, coord, knot = 0, maxknotallowed = 5) {
   
   expr <- expr[, rownames(coord), drop = F]
-  if(knot == F) {
+  if(knot != "auto") {
     
-    knotnum <- rep(0, nrow(expr))
+    knotnum <- rep(knot, nrow(expr))
     names(knotnum) <- rownames(expr)
-    xrow <- cbind(1, splines::bs(coord[,'row'], intercept = F, df = 3))
-    ycol <- cbind(1, splines::bs(coord[,'col'], intercept = F, df = 3))
+    xrow <- cbind(1, splines::bs(coord[,'row'], intercept = F, df = knot+3))
+    ycol <- cbind(1, splines::bs(coord[,'col'], intercept = F, df = knot+3))
     
     B <- xrow[,rep(1:ncol(xrow), ncol(xrow))] * ycol[,rep(1:ncol(ycol), each = ncol(ycol))]
     B <- B[, which(matrixStats::colSds(B)>0), drop = F]
@@ -204,7 +204,7 @@ spatialFit <- function(expr, coord, knot = F, maxknotallowed = 5) {
   }
 }
 
-Calbic<- function(numknot, Blist, expr) {
+Calbic <- function(numknot, Blist, expr) {
   
   B <- Blist[[as.character(numknot)]][['B']]
   tBB <- Blist[[as.character(numknot)]][['tBB']]
