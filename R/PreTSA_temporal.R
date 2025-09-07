@@ -44,14 +44,14 @@ temporalTest <- function(expr, pseudotime, pseudotime_permute = NULL, knot = 0, 
   }
 }
 
-Calfstat <- function(expr, pseudotime, knot = F, maxknotallowed = 10){
+Calfstat <- function(expr, pseudotime, knot = 0, maxknotallowed = 10){
   
   expr <- expr[, names(pseudotime), drop = F]
-  if(knot == F) {
+  if(knot != "auto") {
     
-    knotnum <- rep(0, nrow(expr))
+    knotnum <- rep(knot, nrow(expr))
     names(knotnum) <- rownames(expr)
-    B <- splines::bs(pseudotime, intercept = F, df = 3)
+    B <- splines::bs(pseudotime, intercept = F, df = knot+3)
     B <- B[, which(matrixStats::colSds(B)>0), drop = F]
     B <- cbind(1, B)
     rownames(B) <- colnames(expr)
