@@ -1,42 +1,20 @@
-<?xml version="1.0" encoding="UTF-8"?>
-<urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">
-  <url>
-    <loc>https://haotian-zhuang.github.io/PreTSA/404.html</loc>
-  </url>
-  <url>
-    <loc>https://haotian-zhuang.github.io/PreTSA/LICENSE-text.html</loc>
-  </url>
-  <url>
-    <loc>https://haotian-zhuang.github.io/PreTSA/LICENSE.html</loc>
-  </url>
-  <url>
-    <loc>https://haotian-zhuang.github.io/PreTSA/articles/PreTSA_spatial.html</loc>
-  </url>
-  <url>
-    <loc>https://haotian-zhuang.github.io/PreTSA/articles/PreTSA_temporal.html</loc>
-  </url>
-  <url>
-    <loc>https://haotian-zhuang.github.io/PreTSA/articles/index.html</loc>
-  </url>
-  <url>
-    <loc>https://haotian-zhuang.github.io/PreTSA/authors.html</loc>
-  </url>
-  <url>
-    <loc>https://haotian-zhuang.github.io/PreTSA/index.html</loc>
-  </url>
-  <url>
-    <loc>https://haotian-zhuang.github.io/PreTSA/reference/index.html</loc>
-  </url>
-  <url>
-    <loc>https://haotian-zhuang.github.io/PreTSA/reference/spatialFit.html</loc>
-  </url>
-  <url>
-    <loc>https://haotian-zhuang.github.io/PreTSA/reference/spatialTest.html</loc>
-  </url>
-  <url>
-    <loc>https://haotian-zhuang.github.io/PreTSA/reference/temporalFit.html</loc>
-  </url>
-  <url>
-    <loc>https://haotian-zhuang.github.io/PreTSA/reference/temporalTest.html</loc>
-  </url>
+<urlset xmlns = 'http://www.sitemaps.org/schemas/sitemap/0.9'>
+<url><loc>https://haotian-zhuang.github.io/PreTSA/404.html</loc></url>
+<url><loc>https://haotian-zhuang.github.io/PreTSA/LICENSE-text.html</loc></url>
+<url><loc>https://haotian-zhuang.github.io/PreTSA/LICENSE.html</loc></url>
+<url><loc>https://haotian-zhuang.github.io/PreTSA/articles/PreTSA_spatial.html</loc></url>
+<url><loc>https://haotian-zhuang.github.io/PreTSA/articles/PreTSA_temporal.html</loc></url>
+<url><loc>https://haotian-zhuang.github.io/PreTSA/articles/index.html</loc></url>
+<url><loc>https://haotian-zhuang.github.io/PreTSA/authors.html</loc></url>
+<url><loc>https://haotian-zhuang.github.io/PreTSA/index.html</loc></url>
+<url><loc>https://haotian-zhuang.github.io/PreTSA/reference/index.html</loc></url>
+<url><loc>https://haotian-zhuang.github.io/PreTSA/reference/spatialFit.html</loc></url>
+<url><loc>https://haotian-zhuang.github.io/PreTSA/reference/spatialFit_bin.html</loc></url>
+<url><loc>https://haotian-zhuang.github.io/PreTSA/reference/spatialTest.html</loc></url>
+<url><loc>https://haotian-zhuang.github.io/PreTSA/reference/spatialTest_bin.html</loc></url>
+<url><loc>https://haotian-zhuang.github.io/PreTSA/reference/temporalFit.html</loc></url>
+<url><loc>https://haotian-zhuang.github.io/PreTSA/reference/temporalFit_bin.html</loc></url>
+<url><loc>https://haotian-zhuang.github.io/PreTSA/reference/temporalTest.html</loc></url>
+<url><loc>https://haotian-zhuang.github.io/PreTSA/reference/temporalTest_bin.html</loc></url>
 </urlset>
+

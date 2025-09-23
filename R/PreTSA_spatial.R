@@ -215,3 +215,49 @@ Calbic <- function(numknot, Blist, expr) {
   bic <- nrow(B)*(1+log(2*pi)+log(mse)) + log(nrow(B))*(ncol(B)+1) # stats::AIC(lm(), k = log(nrow(B)))
   return(bic)
 }
+
+#' Test if the gene expression is associated with spatial locations (binning)
+#'
+#' @param expr The normalized gene expression matrix. Rows represent genes and columns represent spots/cells
+#' @param coord The matrix of spatial locations. Rows represent spots/cells. The column named "row" ("col") represents row (column) coordinates
+#' @param knot Number of knots (0 by default) or \code{"auto"} for automatic selection
+#' @param maxknotallowed A user-defined maximum number of knots (5 by default)
+#' @param numbin Number of bins (10 by default)
+#'
+#' @returns A data frame with the p-value (FDR) and test statistic for each gene (each row)
+#' @export
+#'
+spatialTest_bin <- function(expr, coord, knot = 0, maxknotallowed = 5, numbin = 10) {
+  
+  binning <- cut(1:nrow(expr), breaks = numbin, labels = FALSE)
+  res_list <- lapply(1:numbin, function(i) {
+    print(i)
+    spatialTest(expr = expr[(binning == i), ], coord = coord, knot = knot, maxknotallowed = maxknotallowed)
+  })
+  res <- do.call(rbind, res_list)
+  res <- res[order(res$pval, -res$fstat), ]
+  res[, "fdr"] <- stats::p.adjust(res[, "pval"], method = "fdr")
+  return(res)
+}
+
+#' Fit the gene expression along spatial locations (binning)
+#'
+#' @param expr The normalized gene expression matrix. Rows represent genes and columns represent spots/cells
+#' @param coord The matrix of spatial locations. Rows represent spots/cells. The column named "row" ("col") represents row (column) coordinates
+#' @param knot Number of knots (0 by default) or \code{"auto"} for automatic selection
+#' @param maxknotallowed A user-defined maximum number of knots (5 by default)
+#' @param numbin Number of bins (10 by default)
+#'
+#' @returns The fitted expression matrix. Rows represent genes and columns represent spots/cells
+#' @export
+#'
+spatialFit_bin <- function(expr, coord, knot = 0, maxknotallowed = 5, numbin = 10) {
+  
+  binning <- cut(1:nrow(expr), breaks = numbin, labels = FALSE)
+  res_list <- lapply(1:numbin, function(i) {
+    print(i)
+    spatialFit(expr = expr[(binning == i), ], coord = coord, knot = knot, maxknotallowed = maxknotallowed)
+  })
+  res <- do.call(rbind, res_list)
+  return(res)
+}

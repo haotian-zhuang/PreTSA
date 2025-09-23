@@ -4,14 +4,14 @@
 \alias{temporalFit}
 \title{Fit the gene expression along pseudotime values}
 \usage{
-temporalFit(expr, pseudotime, knot = F, maxknotallowed = 10)
+temporalFit(expr, pseudotime, knot = 0, maxknotallowed = 10)
 }
 \arguments{
 \item{expr}{The normalized gene expression matrix. Rows represent genes and columns represent cells}
 
 \item{pseudotime}{The vector of user-provided pseudotime values}
 
-\item{knot}{Whether to select the optimal number of knots automatically}
+\item{knot}{Number of knots (0 by default) or \code{"auto"} for automatic selection}
 
 \item{maxknotallowed}{A user-defined maximum number of knots (10 by default)}
 }

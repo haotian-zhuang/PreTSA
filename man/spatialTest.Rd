@@ -4,14 +4,14 @@
 \alias{spatialTest}
 \title{Test if the gene expression is associated with spatial locations}
 \usage{
-spatialTest(expr, coord, knot = F, maxknotallowed = 5)
+spatialTest(expr, coord, knot = 0, maxknotallowed = 5)
 }
 \arguments{
 \item{expr}{The normalized gene expression matrix. Rows represent genes and columns represent spots/cells}
 
 \item{coord}{The matrix of spatial locations. Rows represent spots/cells. The column named "row" ("col") represents row (column) coordinates}
 
-\item{knot}{Whether to select the optimal number of knots automatically}
+\item{knot}{Number of knots (0 by default) or \code{"auto"} for automatic selection}
 
 \item{maxknotallowed}{A user-defined maximum number of knots (5 by default)}
 }

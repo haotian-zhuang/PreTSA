@@ -24,44 +24,56 @@ The Visium dataset of a human heart tissue was downloaded from the [10x website]
 # Load packages and datasets
 ```{r setup}
 library(PreTSA)
-load(system.file("extdata", "heart", "heart_cleaned.Rdata", package = "PreTSA"))
+load(system.file("extdata", "visium_human_heart", "preprocessed.Rdata", package = "PreTSA"))
 str(expr)
 str(coord)
 ```
 
 # Fit the gene expression along spatial locations
 ```{r}
-fitRes <- spatialFit(expr = expr, coord = coord, knot = F)
+fitRes <- spatialFit(expr = expr, coord = coord)
 str(fitRes)
 ```
 
-The argument "knot" indicates whether to select the optimal number of knots automatically (FALSE by default). The argument "maxknotallowed" is the user-defined maximum number of knots (5 by default).
+The argument "knot" indicates the number of knots (0 by default) or automatic selection ("auto"). The argument "maxknotallowed" is the user-defined maximum number of knots (5 by default).
 ```{r eval=FALSE}
-spatialFit(expr = expr, coord = coord, knot = T, maxknotallowed = 5)
+spatialFit(expr = expr, coord = coord, knot = "auto", maxknotallowed = 5)
 ```
 
 # Identify spatially variable genes (SVGs)
 It returns a data frame with the p-value, log(p-value), FDR, test statistic and number of knots selected for each gene. Genes are ordered first by p-value (increasing) then by test statistic (decreasing).
 ```{r}
-testRes <- spatialTest(expr = expr, coord = coord, knot = T, maxknotallowed = 5)
+testRes <- spatialTest(expr = expr, coord = coord)
+head(testRes)
+```
+
+# Use binning strategy for fitting and testing
+To mitigate memory demands in generating the full gene expression matrix for extremely large datasets, PreTSA can divide the genes into multiple bins (10 by default) and then combine the fitted gene expression matrices obtained from each bin.
+```{r}
+fitRes <- spatialFit_bin(expr = expr, coord = coord, numbin = 10)
+str(fitRes)
+```
+
+```{r}
+testRes <- spatialTest_bin(expr = expr, coord = coord, numbin = 10)
 head(testRes)
 ```
 
 # Visualize the fitted expression
 The fitted PreTSA expression can be seamlessly incorporated into the `Seurat` pipeline.
 ```{r}
-library(ggplot2)
-library(Seurat)
-heart <- Load10X_Spatial(data.dir = system.file("extdata", "heart", package = "PreTSA"), filename = "V1_Human_Heart_filtered_feature_bc_matrix.h5")
-DefaultAssay(heart)
-heart[["Fitted"]] <- CreateAssayObject(data = fitRes)
-DefaultAssay(heart) <- "Fitted"
+suppressPackageStartupMessages(library(ggplot2))
+suppressPackageStartupMessages(library(Seurat))
+d <- Load10X_Spatial(data.dir = system.file("extdata", "visium_human_heart", package = "PreTSA"), filename = "V1_Human_Heart_filtered_feature_bc_matrix.h5")
+DefaultAssay(d)
+d[["Fitted"]] <- CreateAssayObject(data = fitRes)
+DefaultAssay(d) <- "Fitted"
 ```
 
 As an example, the fitted PreTSA expression of *MYH7* shows that spots in the right side have significantly lower expression levels than those in the left side.
 ```{r}
 genename <- "MYH7"
-SpatialFeaturePlot(heart, features = genename) +
+SpatialFeaturePlot(d, features = genename, image.alpha = 0.8, pt.size.factor = 2.5) +
   theme(legend.position = "right", legend.title = element_text(face = "italic"))
 ```
 

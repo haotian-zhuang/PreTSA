@@ -8,7 +8,7 @@ temporalTest(
   expr,
   pseudotime,
   pseudotime_permute = NULL,
-  knot = F,
+  knot = 0,
   maxknotallowed = 10
 )
 }
@@ -19,7 +19,7 @@ temporalTest(
 
 \item{pseudotime_permute}{A list of permuted pseudotime values from subsampled cells. Each element in the list has the same format of the argument \code{pseudotime}}
 
-\item{knot}{Whether to select the optimal number of knots automatically}
+\item{knot}{Number of knots (0 by default) or \code{"auto"} for automatic selection}
 
 \item{maxknotallowed}{A user-defined maximum number of knots (10 by default)}
 }
