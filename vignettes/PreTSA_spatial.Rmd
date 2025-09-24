@@ -19,11 +19,35 @@ knitr::opts_chunk$set(
 # Introduction
 We will demonstrate how to use PreTSA to fit the gene expression along spatial locations and identify spatially variable genes (SVGs).
 
-The Visium dataset of a human heart tissue was downloaded from the [10x website](https://www.10xgenomics.com/resources/datasets/human-heart-1-standard-1-1-0). Mitochondrial genes and genes that are expressed in fewer than 50 spots were filtered out. We analyzed a final set of 11,953 genes on 4,247 spots. `SCTransform` with default settings was used to normalize the raw count data.
+# Install and load the package
+```{r eval=FALSE}
+if (!require("devtools"))
+install.packages("devtools")
+devtools::install_github("haotian-zhuang/PreTSA")
+```
 
-# Load packages and datasets
 ```{r setup}
 library(PreTSA)
+```
+
+# Load and preprocess the dataset
+The Visium dataset of a human heart tissue was downloaded from the [10x website](https://www.10xgenomics.com/resources/datasets/human-heart-1-standard-1-1-0). Mitochondrial genes and genes that are expressed in fewer than 50 spots were filtered out. We analyzed a final set of 11,953 genes on 4,247 spots. `SCTransform` with default settings was used to normalize the raw count data.
+```{r}
+suppressPackageStartupMessages(library(Seurat))
+d <- Load10X_Spatial(data.dir = system.file("extdata", "visium_human_heart", package = "PreTSA"), filename = "V1_Human_Heart_filtered_feature_bc_matrix.h5")
+```
+
+```{r eval=FALSE}
+counts <- d@assays$Spatial$counts
+counts <- counts[rowSums(counts > 0) >= 50, ]
+counts <- counts[!grepl("MT-", rownames(counts)), ]
+d <- subset(d, features = rownames(counts))
+d <- SCTransform(d, assay = "Spatial", verbose = FALSE)
+expr <- d@assays$SCT$data
+```
+
+The processed dataset can be loaded directly from the package to save time.
+```{r}
 load(system.file("extdata", "visium_human_heart", "preprocessed.Rdata", package = "PreTSA"))
 str(expr)
 str(coord)
@@ -41,13 +65,13 @@ spatialFit(expr = expr, coord = coord, knot = "auto", maxknotallowed = 5)
 ```
 
 # Identify spatially variable genes (SVGs)
-It returns a data frame with the p-value, log(p-value), FDR, test statistic and number of knots selected for each gene. Genes are ordered first by p-value (increasing) then by test statistic (decreasing).
+It returns a data frame with the p-value, FDR, test statistic and number of knots selected for each gene. Genes are ordered first by p-value (increasing) then by test statistic (decreasing).
 ```{r}
 testRes <- spatialTest(expr = expr, coord = coord)
 head(testRes)
 ```
 
-# Use binning strategy for fitting and testing
+# Use binning strategy for large datasets
 To mitigate memory demands in generating the full gene expression matrix for extremely large datasets, PreTSA can divide the genes into multiple bins (10 by default) and then combine the fitted gene expression matrices obtained from each bin.
 ```{r}
 fitRes <- spatialFit_bin(expr = expr, coord = coord, numbin = 10)
@@ -62,16 +86,13 @@ head(testRes)
 # Visualize the fitted expression
 The fitted PreTSA expression can be seamlessly incorporated into the `Seurat` pipeline.
 ```{r}
-suppressPackageStartupMessages(library(ggplot2))
-suppressPackageStartupMessages(library(Seurat))
-d <- Load10X_Spatial(data.dir = system.file("extdata", "visium_human_heart", package = "PreTSA"), filename = "V1_Human_Heart_filtered_feature_bc_matrix.h5")
-DefaultAssay(d)
 d[["Fitted"]] <- CreateAssayObject(data = fitRes)
 DefaultAssay(d) <- "Fitted"
 ```
 
 As an example, the fitted PreTSA expression of *MYH7* shows that spots in the right side have significantly lower expression levels than those in the left side.
 ```{r}
+suppressPackageStartupMessages(library(ggplot2))
 genename <- "MYH7"
 SpatialFeaturePlot(d, features = genename, image.alpha = 0.8, pt.size.factor = 2.5) +
   theme(legend.position = "right", legend.title = element_text(face = "italic"))

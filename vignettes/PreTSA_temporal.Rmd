@@ -19,11 +19,36 @@ knitr::opts_chunk$set(
 # Introduction
 We will demonstrate how to use PreTSA to fit the gene expression along pseudotime values and identify temporally variable genes (TVGs).
 
-The 3K peripheral blood mononuclear cells (PBMC3K) dataset was downloaded from the [10x website](https://www.10xgenomics.com/resources/datasets/3-k-pbm-cs-from-a-healthy-donor-1-standard-1-1-0). The processed PBMC3K dataset was downloaded using the R package `SeuratData`. `TSCAN` was used to construct a pseudotime trajectory from naive CD4 T cells to memory CD4 T cells with the top 10 principal components (PCs) and the cell clusters obtained from the dataset. Genes that are expressed in fewer than 5 cells within the trajectory were filtered out. We analyzed a final set of 10,509 genes on 1,180 cells.
+# Install and load the package
+```{r eval=FALSE}
+if (!require("devtools"))
+install.packages("devtools")
+devtools::install_github("haotian-zhuang/PreTSA")
+```
 
-# Load packages and datasets
 ```{r setup}
 library(PreTSA)
+```
+
+# Load and preprocess the dataset
+The 3K peripheral blood mononuclear cells (PBMC3K) dataset was downloaded from the [10x website](https://www.10xgenomics.com/resources/datasets/3-k-pbm-cs-from-a-healthy-donor-1-standard-1-1-0). The processed PBMC3K dataset was downloaded using the R package `SeuratData`. `TSCAN` was used to construct a pseudotime trajectory from naive CD4 T cells to memory CD4 T cells with the top 10 principal components (PCs) and the cell clusters obtained from the dataset. Genes that are expressed in fewer than 5 cells within the trajectory were filtered out. We analyzed a final set of 10,509 genes on 1,180 cells.
+```{r eval=FALSE}
+suppressPackageStartupMessages(library(Seurat))
+suppressPackageStartupMessages(library(SeuratData))
+suppressPackageStartupMessages(library(TSCAN))
+d <- LoadData("pbmc3k", type = "pbmc3k.final")
+d <- UpdateSeuratObject(object = d)
+dr <- Embeddings(d, reduction = "pca")[, 1:10]
+clu <- Idents(d)
+order <- guided_tscan(dr = dr, clu = clu, cluorder = c("Naive CD4 T", "Memory CD4 T"))
+pseudotime <- setNames(1:length(order), order)
+expr <- d@assays$RNA$data
+expr <- expr[, names(pseudotime)]
+expr <- expr[rowSums(expr > 0) >= 5, ]
+```
+
+The processed dataset can be loaded directly from the package to save time.
+```{r}
 load(system.file("extdata", "sc_pbmc3k", "preprocessed.Rdata", package = "PreTSA"))
 str(expr)
 str(pseudotime)
@@ -41,25 +66,39 @@ temporalFit(expr = expr, pseudotime = pseudotime, knot = "auto", maxknotallowed 
 ```
 
 # Identify temporally variable genes (TVGs)
-To account for the pseudotime uncertainty, we apply the similar strategy used in `PseudotimeDE`. The argument "pseudotime_permute" is a list of permuted pseudotime values from subsampled cells. Each element in the list has the same format of the argument "pseudotime".
-```{r}
-length(pseudotime_permute)
-str(pseudotime_permute[[1]])
-```
-
 It returns a data frame with the p-value, FDR, test statistic and number of knots selected for each gene. Genes are ordered first by p-value (increasing) then by test statistic (decreasing).
-```{r}
-testRes <- temporalTest(expr = expr[1:100, ], pseudotime = pseudotime, pseudotime_permute = pseudotime_permute)
-head(testRes)
-```
-
-To reduce the computational time, users can ignore the pseudotime uncertainty, which is the default setting.
 ```{r}
 testRes <- temporalTest(expr = expr, pseudotime = pseudotime)
 head(testRes)
 ```
 
-# Use binning strategy for fitting and testing
+To account for the pseudotime uncertainty, we apply the strategy used in `PseudotimeDE`, by subsampling 80\% of cells and using the same procedure as in pseudotime inference on the original dataset.
+```{r eval=FALSE}
+set.seed(2025)
+n.permute <- 100
+pseudotime_list <- lapply(1:n.permute, function(i) {
+  cell.subsample <- sample(colnames(d), 0.8 * ncol(d), replace = FALSE)
+  d.subsample <- subset(d, cells = cell.subsample)
+  d.subsample <- RunPCA(d.subsample, npcs = 10, verbose = FALSE)
+  dr <- Embeddings(d.subsample, reduction = "pca")[, 1:10]
+  clu <- Idents(d.subsample)
+  order <- guided_tscan(dr = dr, clu = clu, cluorder = c("Naive CD4 T", "Memory CD4 T"))
+  pseudotime <- setNames(1:length(order), order)
+  pseudotime
+})
+pseudotime_permute <- lapply(pseudotime_list, function(i) {
+  names(i) <- sample(names(i), replace = FALSE)
+  i
+})
+```
+
+The argument "pseudotime_permute" is a list of permuted pseudotime values from subsampled cells. Each element in the list has the same format of the argument "pseudotime".
+```{r}
+testRes <- temporalTest(expr = expr[1:100, ], pseudotime = pseudotime, pseudotime_permute = pseudotime_permute)
+head(testRes)
+```
+
+# Use binning strategy for large datasets
 To mitigate memory demands in generating the full gene expression matrix for extremely large datasets, PreTSA can divide the genes into multiple bins (10 by default) and then combine the fitted gene expression matrices obtained from each bin.
 ```{r}
 fitRes <- temporalFit_bin(expr = expr, pseudotime = pseudotime, numbin = 10)
