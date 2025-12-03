@@ -1,6 +1,5 @@
 # pretsa_temporal.py
 import numpy as np
-from numba import njit
 from patsy import dmatrix
 from scipy.stats import f as fdist, gamma as gamma_dist
 
@@ -17,11 +16,10 @@ def _design(pseudotime, df):
     B = np.concatenate([np.ones((B.shape[0], 1)), B], axis=1)
     return np.ascontiguousarray(B, dtype=np.float64)
 
-@njit(cache=True)
-def _pred(expr_GN, B_NN):
-    tBB = B_NN.T @ B_NN
-    inv_tBB = np.linalg.inv(tBB)
-    return (expr_GN @ B_NN) @ inv_tBB @ B_NN.T
+def _pred(expr_GN, B_NP):
+    tBB = B_NP.T @ B_NP
+    coef = np.linalg.solve(tBB, B_NP.T @ expr_GN.T)
+    return (B_NP @ coef).T
 
 def Calfstat(expr, pseudotime, knot=0, maxknotallowed=10):
     expr = np.asarray(expr, dtype=np.float64)

@@ -1,6 +1,5 @@
 # pretsa_spatial.py
 import numpy as np
-from numba import njit
 from patsy import dmatrix
 from scipy.stats import f as fdist
 
@@ -22,11 +21,10 @@ def _tp_basis(row_vals, col_vals, df):
     B = np.concatenate([np.ones((B.shape[0], 1)), B], axis=1)
     return np.ascontiguousarray(B, dtype=np.float64)
 
-@njit(cache=True)
 def _pred(expr_GN, B_NP):
     tBB = B_NP.T @ B_NP
-    inv_tBB = np.linalg.inv(tBB)
-    return (expr_GN @ B_NP) @ inv_tBB @ B_NP.T
+    coef = np.linalg.solve(tBB, B_NP.T @ expr_GN.T)
+    return (B_NP @ coef).T
 
 def spatialTest(expr, coord, knot=0, maxknotallowed=5):
     expr = np.asarray(expr, dtype=np.float64)
