@@ -43,7 +43,14 @@
 
     <div class="section level2">
     <h2 id="ref-usage">Usage<a class="anchor" aria-label="anchor" href="#ref-usage"></a></h2>
-    <div class="sourceCode"><pre class="sourceCode r"><code><span><span class="fu">spatialFit</span><span class="op">(</span><span class="va">expr</span>, <span class="va">coord</span>, knot <span class="op">=</span> <span class="fl">0</span>, maxknotallowed <span class="op">=</span> <span class="fl">5</span><span class="op">)</span></span></code></pre></div>
+    <div class="sourceCode"><pre class="sourceCode r"><code><span><span class="fu">spatialFit</span><span class="op">(</span></span>
+<span>  <span class="va">expr</span>,</span>
+<span>  <span class="va">coord</span>,</span>
+<span>  knot <span class="op">=</span> <span class="fl">0</span>,</span>
+<span>  maxknotallowed <span class="op">=</span> <span class="fl">5</span>,</span>
+<span>  knot_row <span class="op">=</span> <span class="va">knot</span>,</span>
+<span>  knot_col <span class="op">=</span> <span class="va">knot</span></span>
+<span><span class="op">)</span></span></code></pre></div>
     </div>
 
     <div class="section level2">
@@ -64,6 +71,14 @@
 
 <dt id="arg-maxknotallowed">maxknotallowed<a class="anchor" aria-label="anchor" href="#arg-maxknotallowed"></a></dt>
 <dd><p>A user-defined maximum number of knots (5 by default)</p></dd>
+
+
+<dt id="arg-knot-row">knot_row<a class="anchor" aria-label="anchor" href="#arg-knot-row"></a></dt>
+<dd><p>Number of knots for the row direction (<code>knot</code> by default)</p></dd>
+
+
+<dt id="arg-knot-col">knot_col<a class="anchor" aria-label="anchor" href="#arg-knot-col"></a></dt>
+<dd><p>Number of knots for the column direction (<code>knot</code> by default)</p></dd>
 
 </dl></div>
     <div class="section level2">

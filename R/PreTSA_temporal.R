@@ -26,8 +26,10 @@ temporalTest <- function(expr, pseudotime, pseudotime_permute = NULL, knot = 0, 
     pval.empirical <- (Matrix::rowSums(fstat.perm >= fstat.ori) + 1)/(ncol(fstat.perm) + 1)
     
     pval.parametric <- sapply(1:nrow(fstat.perm), function(i) {
-      if(!'try-error'%in%class(try(suppressWarnings(fitdistrplus::fitdist(fstat.perm[i, ], 'gamma')), silent = T))) {
-        fit.gamma <- suppressWarnings(fitdistrplus::fitdist(fstat.perm[i, ], 'gamma'))
+      if(fstat.ori[i] == 0) { return(setNames(1, nm = names(fstat.ori)[i])) }
+      
+      if(!'try-error'%in%class(try(capture.output(fitdistrplus::fitdist(fstat.perm[i, ], 'gamma')), silent = T))) {
+        fit.gamma <- fitdistrplus::fitdist(fstat.perm[i, ], 'gamma')
         return(stats::pgamma(fstat.ori[i], shape = fit.gamma$estimate[1], rate = fit.gamma$estimate[2], lower.tail = F))
       } else {
         return(NA)
@@ -250,8 +252,6 @@ temporalFit <- function(expr, pseudotime, knot = 0, maxknotallowed = 10) {
   expr <- expr[, names(pseudotime), drop = F]
   if(knot != "auto") {
     
-    knotnum <- rep(knot, nrow(expr))
-    names(knotnum) <- rownames(expr)
     B <- splines::bs(pseudotime, intercept = F, df = knot+3)
     B <- B[, which(matrixStats::colSds(B)>0), drop = F]
     B <- cbind(1, B)

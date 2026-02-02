@@ -4,7 +4,14 @@
 \alias{spatialFit}
 \title{Fit the gene expression along spatial locations}
 \usage{
-spatialFit(expr, coord, knot = 0, maxknotallowed = 5)
+spatialFit(
+  expr,
+  coord,
+  knot = 0,
+  maxknotallowed = 5,
+  knot_row = knot,
+  knot_col = knot
+)
 }
 \arguments{
 \item{expr}{The normalized gene expression matrix. Rows represent genes and columns represent spots/cells}
@@ -14,6 +21,10 @@ spatialFit(expr, coord, knot = 0, maxknotallowed = 5)
 \item{knot}{Number of knots (0 by default) or \code{"auto"} for automatic selection}
 
 \item{maxknotallowed}{A user-defined maximum number of knots (5 by default)}
+
+\item{knot_row}{Number of knots for the row direction (\code{knot} by default)}
+
+\item{knot_col}{Number of knots for the column direction (\code{knot} by default)}
 }
 \value{
 The fitted expression matrix. Rows represent genes and columns represent spots/cells

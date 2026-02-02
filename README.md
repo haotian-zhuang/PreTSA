@@ -11,6 +11,8 @@ install.packages("devtools")
 devtools::install_github("haotian-zhuang/PreTSA")
 ```
 
+For users with suitable hardware and technical expertise, non-standard R installations may further increase the computational efficiency of PreTSA. For example, using a threaded MKL-based R installation, such as one installed via a package manager like conda, may reduce computation time by more efficiently parallelizing matrix operations.
+
 ## Vignettes
 Detailed vignettes are available at this [website](https://haotian-zhuang.github.io/PreTSA/).
 

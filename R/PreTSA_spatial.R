@@ -4,19 +4,38 @@
 #' @param coord The matrix of spatial locations. Rows represent spots/cells. The column named "row" ("col") represents row (column) coordinates
 #' @param knot Number of knots (0 by default) or \code{"auto"} for automatic selection
 #' @param maxknotallowed A user-defined maximum number of knots (5 by default)
+#' @param knot_row Number of knots for the row direction (\code{knot} by default)
+#' @param knot_col Number of knots for the column direction (\code{knot} by default)
 #'
 #' @return A data frame with the p-value (FDR) and test statistic for each gene (each row)
 #' @export
 #'
-spatialTest <- function(expr, coord, knot = 0, maxknotallowed = 5) {
+spatialTest <- function(expr, coord, knot = 0, maxknotallowed = 5, knot_row = knot, knot_col = knot) {
+  
+  row_range <- range(coord[,'row'])
+  col_range <- range(coord[,'col'])
+  aspect_ratio <- diff(row_range) / diff(col_range)
+  aspect_ratio <- max(aspect_ratio, 1 / aspect_ratio)
+  if (aspect_ratio > 2) {
+    message(
+      sprintf(
+        paste(
+          "The spatial sample has a large aspect ratio (%.2f).",
+          "You may consider selecting different numbers of knots for the row and column directions,",
+          "or cropping the sample when appropriate."
+        ),
+        aspect_ratio
+      )
+    )
+  }
   
   expr <- expr[, rownames(coord), drop = F]
   if(knot != "auto") {
     
     knotnum <- rep(knot, nrow(expr))
     names(knotnum) <- rownames(expr)
-    xrow <- cbind(1, splines::bs(coord[,'row'], intercept = F, df = knot+3))
-    ycol <- cbind(1, splines::bs(coord[,'col'], intercept = F, df = knot+3))
+    xrow <- cbind(1, splines::bs(coord[,'row'], intercept = F, df = knot_row+3))
+    ycol <- cbind(1, splines::bs(coord[,'col'], intercept = F, df = knot_col+3))
     
     B <- xrow[,rep(1:ncol(xrow), ncol(xrow))] * ycol[,rep(1:ncol(ycol), each = ncol(ycol))]
     B <- B[, which(matrixStats::colSds(B)>0), drop = F]
@@ -25,6 +44,8 @@ spatialTest <- function(expr, coord, knot = 0, maxknotallowed = 5) {
     colnames(B) <- NULL
     tBB <- crossprod(B)
     rownames(tBB) <- colnames(tBB) <- NULL
+    
+    if ('try-error'%in%class(try(chol(tBB), silent = T))) { tBB <- tBB + diag(1e-10, nrow(tBB)) }
     
     pred <- as.matrix(expr %*% B %*% tcrossprod(chol2inv(chol(tBB)), B))
     
@@ -122,19 +143,36 @@ spatialTest <- function(expr, coord, knot = 0, maxknotallowed = 5) {
 #' @param coord The matrix of spatial locations. Rows represent spots/cells. The column named "row" ("col") represents row (column) coordinates
 #' @param knot Number of knots (0 by default) or \code{"auto"} for automatic selection
 #' @param maxknotallowed A user-defined maximum number of knots (5 by default)
+#' @param knot_row Number of knots for the row direction (\code{knot} by default)
+#' @param knot_col Number of knots for the column direction (\code{knot} by default)
 #'
 #' @return The fitted expression matrix. Rows represent genes and columns represent spots/cells
 #' @export
 #'
-spatialFit <- function(expr, coord, knot = 0, maxknotallowed = 5) {
+spatialFit <- function(expr, coord, knot = 0, maxknotallowed = 5, knot_row = knot, knot_col = knot) {
+  
+  row_range <- range(coord[,'row'])
+  col_range <- range(coord[,'col'])
+  aspect_ratio <- diff(row_range) / diff(col_range)
+  aspect_ratio <- max(aspect_ratio, 1 / aspect_ratio)
+  if (aspect_ratio > 2) {
+    message(
+      sprintf(
+        paste(
+          "The spatial sample has a large aspect ratio (%.2f).",
+          "You may consider selecting different numbers of knots for the row and column directions,",
+          "or cropping the sample when appropriate."
+        ),
+        aspect_ratio
+      )
+    )
+  }
   
   expr <- expr[, rownames(coord), drop = F]
   if(knot != "auto") {
     
-    knotnum <- rep(knot, nrow(expr))
-    names(knotnum) <- rownames(expr)
-    xrow <- cbind(1, splines::bs(coord[,'row'], intercept = F, df = knot+3))
-    ycol <- cbind(1, splines::bs(coord[,'col'], intercept = F, df = knot+3))
+    xrow <- cbind(1, splines::bs(coord[,'row'], intercept = F, df = knot_row+3))
+    ycol <- cbind(1, splines::bs(coord[,'col'], intercept = F, df = knot_col+3))
     
     B <- xrow[,rep(1:ncol(xrow), ncol(xrow))] * ycol[,rep(1:ncol(ycol), each = ncol(ycol))]
     B <- B[, which(matrixStats::colSds(B)>0), drop = F]
@@ -143,64 +181,66 @@ spatialFit <- function(expr, coord, knot = 0, maxknotallowed = 5) {
     colnames(B) <- NULL
     tBB <- crossprod(B)
     rownames(tBB) <- colnames(tBB) <- NULL
+    
+    if ('try-error'%in%class(try(chol(tBB), silent = T))) { tBB <- tBB + diag(1e-10, nrow(tBB)) }
     
     pred <- as.matrix(expr %*% B %*% tcrossprod(chol2inv(chol(tBB)), B))
     return(pred)
   } else {
-  
-  knotnum0 <- 0:maxknotallowed
-  names(knotnum0) <- knotnum0
-  
-  Blist <- lapply(knotnum0, function(numknot) {
     
-    xrow <- cbind(1, splines::bs(coord[,'row'], intercept = F, df = numknot+3))
-    ycol <- cbind(1, splines::bs(coord[,'col'], intercept = F, df = numknot+3))
+    knotnum0 <- 0:maxknotallowed
+    names(knotnum0) <- knotnum0
     
-    B <- xrow[,rep(1:ncol(xrow), ncol(xrow))] * ycol[,rep(1:ncol(ycol), each = ncol(ycol))]
-    B <- B[, which(matrixStats::colSds(B)>0), drop = F]
-    B <- cbind(1, B)
-    rownames(B) <- colnames(expr)
-    colnames(B) <- NULL
-    tBB <- crossprod(B)
-    rownames(tBB) <- colnames(tBB) <- NULL
-    list(B = B, tBB = tBB)
-  })
-  names(Blist) <- as.character(knotnum0)
-  
-  testpos <- sapply(knotnum0, function(numknot) {
+    Blist <- lapply(knotnum0, function(numknot) {
+      
+      xrow <- cbind(1, splines::bs(coord[,'row'], intercept = F, df = numknot+3))
+      ycol <- cbind(1, splines::bs(coord[,'col'], intercept = F, df = numknot+3))
+      
+      B <- xrow[,rep(1:ncol(xrow), ncol(xrow))] * ycol[,rep(1:ncol(ycol), each = ncol(ycol))]
+      B <- B[, which(matrixStats::colSds(B)>0), drop = F]
+      B <- cbind(1, B)
+      rownames(B) <- colnames(expr)
+      colnames(B) <- NULL
+      tBB <- crossprod(B)
+      rownames(tBB) <- colnames(tBB) <- NULL
+      list(B = B, tBB = tBB)
+    })
+    names(Blist) <- as.character(knotnum0)
     
-    tBB <- Blist[[as.character(numknot)]][['tBB']]
-    !'try-error'%in%class(try(chol(tBB), silent = T))
-    #matrixcalc::is.positive.definite(tBB)
-  })
-  
-  if(mean(testpos) != 1) {
-    maxknot <- which(testpos == F)[1] - 2
-    knotnum0 <- 0:maxknot
-    names(knotnum0) <- knotnum0 }
-  
-  expr <- Matrix::t(expr)
-  
-  bic <- sapply(knotnum0, Calbic, Blist = Blist, expr = expr)
-  
-  knotnum <- knotnum0[apply(bic, 1, which.min)]
-  names(knotnum) <- rownames(bic)
-  print(table(knotnum))
-  
-  pred <- lapply(unique(knotnum), function(k) {
+    testpos <- sapply(knotnum0, function(numknot) {
+      
+      tBB <- Blist[[as.character(numknot)]][['tBB']]
+      !'try-error'%in%class(try(chol(tBB), silent = T))
+      #matrixcalc::is.positive.definite(tBB)
+    })
     
-    B <- Blist[[as.character(k)]][['B']]
-    tBB <- Blist[[as.character(k)]][['tBB']]
+    if(mean(testpos) != 1) {
+      maxknot <- which(testpos == F)[1] - 2
+      knotnum0 <- 0:maxknot
+      names(knotnum0) <- knotnum0 }
     
-    beta <- as.matrix(tcrossprod(chol2inv(chol(tBB)), B) %*% expr[, which(knotnum == k), drop = F])
-    pred <- B %*% beta
-    pred
-  })
-  
-  pred <- do.call(cbind, pred)
-  pred <- pred[, colnames(expr)]
-  pred <- Matrix::t(pred)
-  return(pred)
+    expr <- Matrix::t(expr)
+    
+    bic <- sapply(knotnum0, Calbic, Blist = Blist, expr = expr)
+    
+    knotnum <- knotnum0[apply(bic, 1, which.min)]
+    names(knotnum) <- rownames(bic)
+    print(table(knotnum))
+    
+    pred <- lapply(unique(knotnum), function(k) {
+      
+      B <- Blist[[as.character(k)]][['B']]
+      tBB <- Blist[[as.character(k)]][['tBB']]
+      
+      beta <- as.matrix(tcrossprod(chol2inv(chol(tBB)), B) %*% expr[, which(knotnum == k), drop = F])
+      pred <- B %*% beta
+      pred
+    })
+    
+    pred <- do.call(cbind, pred)
+    pred <- pred[, colnames(expr)]
+    pred <- Matrix::t(pred)
+    return(pred)
   }
 }
 
