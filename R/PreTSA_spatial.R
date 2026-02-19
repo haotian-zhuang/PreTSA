@@ -37,7 +37,7 @@ spatialTest <- function(expr, coord, knot = 0, maxknotallowed = 5, knot_row = kn
     xrow <- cbind(1, splines::bs(coord[,'row'], intercept = F, df = knot_row+3))
     ycol <- cbind(1, splines::bs(coord[,'col'], intercept = F, df = knot_col+3))
     
-    B <- xrow[,rep(1:ncol(xrow), ncol(xrow))] * ycol[,rep(1:ncol(ycol), each = ncol(ycol))]
+    B <- xrow[,rep(1:ncol(xrow), ncol(ycol))] * ycol[,rep(1:ncol(ycol), each = ncol(xrow))]
     B <- B[, which(matrixStats::colSds(B)>0), drop = F]
     B <- cbind(1, B)
     rownames(B) <- colnames(expr)
@@ -174,7 +174,7 @@ spatialFit <- function(expr, coord, knot = 0, maxknotallowed = 5, knot_row = kno
     xrow <- cbind(1, splines::bs(coord[,'row'], intercept = F, df = knot_row+3))
     ycol <- cbind(1, splines::bs(coord[,'col'], intercept = F, df = knot_col+3))
     
-    B <- xrow[,rep(1:ncol(xrow), ncol(xrow))] * ycol[,rep(1:ncol(ycol), each = ncol(ycol))]
+    B <- xrow[,rep(1:ncol(xrow), ncol(ycol))] * ycol[,rep(1:ncol(ycol), each = ncol(xrow))]
     B <- B[, which(matrixStats::colSds(B)>0), drop = F]
     B <- cbind(1, B)
     rownames(B) <- colnames(expr)

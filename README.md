@@ -22,7 +22,7 @@ Vignette: [Model spatial gene expression patterns](https://haotian-zhuang.github
 
 ## Citation
 
-Please cite the following paper: [Zhuang, Haotian, and Zhicheng Ji. "PreTSA: computationally efficient modeling of temporal and spatial gene expression patterns." bioRxiv (2024): 2024-03.](https://www.biorxiv.org/content/10.1101/2024.03.20.585926v1)
+Please cite the following paper: [Haotian Zhuang and Zhicheng Ji. PreTSA: computationally efficient modeling of temporal and spatial gene expression patterns. Genome Biology (2026).](https://doi.org/10.1186/s13059-026-03994-3)
 
 ## Contact
 
